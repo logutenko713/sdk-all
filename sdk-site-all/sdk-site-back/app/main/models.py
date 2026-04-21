@@ -1,6 +1,30 @@
 from django.db import models
+from django.db.models import CharField
 from django.utils import timezone
+from django.core.validators import FileExtensionValidator
 
+class Documentation(models.Model):
+    image = models.ImageField(upload_to="Photo/documentation/image", verbose_name="Фото документации")
+    name = models.CharField(max_length=100, verbose_name="Название документа")
+    pdf_file = models.FileField(
+        verbose_name="PDF файл",
+        upload_to="Photo/documentation/pdf",
+        validators=[FileExtensionValidator(['pdf'])],
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    is_active = models.BooleanField(default=True,
+                                    verbose_name="Активен")  # Флаг активности - показывать ли товар на сайте
+
+
+    class Meta:
+        verbose_name = "Документация"
+        verbose_name_plural = "Документация"
+
+    def __str__(self):
+        return self.name
+
+
+# Карусель слайдов на главной странице
 class CarouselSection(models.Model):
     image = models.ImageField(verbose_name="Фото слайда", upload_to="Photo/slides", blank = True, null=True)
     # Дата создания товара в системе
@@ -11,6 +35,7 @@ class CarouselSection(models.Model):
         verbose_name = "Карусель"
         verbose_name_plural = "Карусель"
 
+# Товар
 class Product (models.Model):
     name = models.CharField(max_length=100, verbose_name="Название") # Название товара (например, "Доска обрезная")
     category = models.CharField(max_length=100, verbose_name="Категория") # Категория товара (например, "Пиломатериалы")

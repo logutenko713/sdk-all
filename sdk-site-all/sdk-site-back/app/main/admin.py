@@ -3,8 +3,29 @@ from django.utils.safestring import mark_safe
 from .models import (
     Product, Grade, Surface, Width, ProductVariant,
     Cart, CartItem, Order, OrderItem, CallbackRequest,
-    Session, OrderStatus, CarouselSection
+    Session, OrderStatus, CarouselSection, Documentation
 )
+
+@admin.register(Documentation)
+class DocumentationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'image_preview', 'pdf_link', 'is_active', 'created_at']
+    list_editable = ['is_active']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['name']
+
+    def image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="50" height="50" style="object-fit: cover;" />')
+        return "Нет фото"
+
+    image_preview.short_description = 'Превью'
+
+    def pdf_link(self, obj):
+        if obj.pdf_file:
+            return mark_safe(f'<a href="{obj.pdf_file.url}" target="_blank">📄 Скачать PDF</a>')
+        return "Нет PDF"
+
+    pdf_link.short_description = 'PDF файл'
 
 @admin.register(CarouselSection)
 class CarouselSectionAdmin(admin.ModelAdmin):

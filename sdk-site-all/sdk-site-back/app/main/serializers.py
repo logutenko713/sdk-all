@@ -14,7 +14,25 @@ class PriceUpsertSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 from .models import (Product, ProductVariant, Cart, CartItem, Order, OrderItem, CallbackRequest, Session, Grade,
-                     Surface, Width, OrderStatus, CarouselSection)
+                     Surface, Width, OrderStatus, CarouselSection, Documentation)
+
+class DocumentationSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    pdf_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Documentation
+        fields = ['id', 'name', 'image_url', 'pdf_url', 'created_at', 'is_active']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+
+    def get_pdf_url(self, obj):
+        if obj.pdf_file:
+            return obj.pdf_file.url
+        return None
 
 class CarouselSectionSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
