@@ -3,6 +3,23 @@ from django.db.models import CharField
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 
+
+class TableCatalog2(models.Model):
+    image = models.ImageField(upload_to="Photo/catalog/cards", verbose_name="Изображение товара")
+    name = models.CharField(max_length=100, verbose_name="Продукция")
+    measurement = models.CharField(max_length=100, verbose_name="Измерение")
+    price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена за ед.")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    class Meta:
+        verbose_name = "Таблица для каталога(2)"
+        verbose_name_plural = "Таблица для каталога(2)"
+
+    def __str__(self):
+        return self.name
+
+# Документация
 class Documentation(models.Model):
     image = models.ImageField(upload_to="Photo/documentation/image", verbose_name="Фото документации")
     name = models.CharField(max_length=100, verbose_name="Название документа")

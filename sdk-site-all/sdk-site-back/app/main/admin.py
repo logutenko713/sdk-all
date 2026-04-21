@@ -3,8 +3,18 @@ from django.utils.safestring import mark_safe
 from .models import (
     Product, Grade, Surface, Width, ProductVariant,
     Cart, CartItem, Order, OrderItem, CallbackRequest,
-    Session, OrderStatus, CarouselSection, Documentation
+    Session, OrderStatus, CarouselSection, Documentation, TableCatalog2
 )
+
+@admin.register(TableCatalog2)
+class TableCatalog2Admin(admin.ModelAdmin):
+    list_display = ['name', 'measurement', 'price', 'image_preview', 'is_active', 'created_at']
+    list_filter = ['name', 'price', 'is_active', 'created_at']
+    def image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="50" height="50" style="object-fit: cover;" />')
+        return "Нет фото"
+    image_preview.short_description = 'Превью'
 
 @admin.register(Documentation)
 class DocumentationAdmin(admin.ModelAdmin):
@@ -31,7 +41,6 @@ class DocumentationAdmin(admin.ModelAdmin):
 class CarouselSectionAdmin(admin.ModelAdmin):
     list_display = ['image_preview', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
-    readonly_fields = ['image_preview']
     def image_preview(self, obj):
         if obj.image:
             return mark_safe(f'<img src="{obj.image.url}" width="80" height="80" style="object-fit: cover;" />')

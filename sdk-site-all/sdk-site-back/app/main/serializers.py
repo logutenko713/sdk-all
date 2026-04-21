@@ -14,7 +14,19 @@ class PriceUpsertSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 from .models import (Product, ProductVariant, Cart, CartItem, Order, OrderItem, CallbackRequest, Session, Grade,
-                     Surface, Width, OrderStatus, CarouselSection, Documentation)
+                     Surface, Width, OrderStatus, CarouselSection, Documentation, TableCatalog2)
+
+class TableCatalog2Serializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TableCatalog2
+        fields = ['id', 'name', 'image_url', 'measurement', 'price', 'created_at', 'is_active']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 class DocumentationSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()

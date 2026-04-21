@@ -40,13 +40,14 @@ from rest_framework import viewsets, permissions
 
 from .models import (
     Product, ProductVariant, Cart, CartItem,
-    Order, OrderItem, CallbackRequest, Session, OrderStatus, CarouselSection, Documentation
+    Order, OrderItem, CallbackRequest, Session, OrderStatus, CarouselSection, Documentation, TableCatalog2
 )
 
 from .serializers import (
     ProductListSerializer, ProductDetailSerializer, ProductVariantSerializer,
     CartSerializer, AddToCartSerializer, UpdateCartItemSerializer,
-    OrderSerializer, CreateOrderSerializer, CallbackRequestSerializer, CarouselSectionSerializer, DocumentationSerializer
+    OrderSerializer, CreateOrderSerializer, CallbackRequestSerializer, CarouselSectionSerializer,
+    DocumentationSerializer, TableCatalog2Serializer
 )
 
 
@@ -63,6 +64,11 @@ def get_or_create_session(request):
 
     session, _ = Session.objects.get_or_create(session_key=session_key) # Получаем сессию
     return session
+
+class TableCatalog2ViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = TableCatalog2.objects.filter(is_active=True)
+    serializer_class = TableCatalog2Serializer
+    permission_classes = [permissions.AllowAny]
 
 class DocumentationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Documentation.objects.filter(is_active=True)
