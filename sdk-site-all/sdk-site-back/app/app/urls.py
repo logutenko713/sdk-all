@@ -14,6 +14,7 @@ router.register(r'callbacks', views.CallbackRequestViewSet, basename='callback')
 router.register(r'carousel', views.CarouselSectionViewSet, basename='carousel')
 router.register(r'documentation', views.DocumentationViewSet, basename='documentation')
 router.register(r'table2', views.TableCatalog2ViewSet, basename='table2')
+router.register(r'table3', views.PlywoodCatalogViewSet, basename='table3')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

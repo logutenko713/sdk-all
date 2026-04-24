@@ -163,6 +163,26 @@ class ProductVariant (models.Model): #Конкретный вариант тов
         length_m = float(self.length)
         return width_m * thickness_m * length_m # Возвращаем объем в м³
 
+class PlywoodCatalog(models.Model):
+    image = models.ImageField(upload_to="Photo/catalog/plywood", verbose_name="Изображение товара")
+    name = models.CharField(max_length=100, verbose_name="Продукция")
+    grade = models.ForeignKey(Grade, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Сорт")  # Сорт
+    surface = models.ForeignKey(Surface, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Тип "
+                                                                                                       "поверхности")  # Тип поверхности этого варианта
+    thickness = models.DecimalField(max_digits=6, decimal_places=1, null = True, blank = True,
+                                    verbose_name="Толщина (мм)")  # Толщина в миллиметрах
+    sheets_per_pack = models.PositiveIntegerField(verbose_name="Количество листов в упаковке (шт)",default=1,
+                                                  null = True, blank = True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена товара")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    class Meta:
+        verbose_name = "Таблица для каталога(3)"
+        verbose_name_plural = "Таблица для каталога(3)"
+
+    def __str__(self):
+        return f"{self.name} -- {self.price}"
 
 class Session(models.Model):
     # Уникальный ключ сессии (генерируется автоматически)

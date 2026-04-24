@@ -14,7 +14,22 @@ class PriceUpsertSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 from .models import (Product, ProductVariant, Cart, CartItem, Order, OrderItem, CallbackRequest, Session, Grade,
-                     Surface, Width, OrderStatus, CarouselSection, Documentation, TableCatalog2)
+                     Surface, Width, OrderStatus, CarouselSection, Documentation, TableCatalog2, PlywoodCatalog)
+
+class PlywoodCatalogSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    grade_name = serializers.CharField(source='grade.name', read_only=True)  # добавить
+    surface_name = serializers.CharField(source='surface.name', read_only=True)  # добавить
+
+    class Meta:
+        model = PlywoodCatalog
+        fields = ['id', 'name', 'image_url', 'grade', 'grade_name', 'surface', 'surface_name',
+                  'thickness', 'sheets_per_pack', 'price', 'created_at', 'is_active']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 class TableCatalog2Serializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()

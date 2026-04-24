@@ -3,13 +3,27 @@ from django.utils.safestring import mark_safe
 from .models import (
     Product, Grade, Surface, Width, ProductVariant,
     Cart, CartItem, Order, OrderItem, CallbackRequest,
-    Session, OrderStatus, CarouselSection, Documentation, TableCatalog2
+    Session, OrderStatus, CarouselSection, Documentation, TableCatalog2, PlywoodCatalog
 )
+
+@admin.register(PlywoodCatalog)
+class PlywoodCatalogAdmin(admin.ModelAdmin):
+    list_display = ['name', 'image_photo', 'grade', 'surface', 'thickness', 'sheets_per_pack', 'price', 'created_at', 'is_active']
+    list_filter = ['is_active']
+    list_editable = ['price', 'is_active']
+
+    def image_photo(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="50" height="50" style="object-fit: cover;" />')
+        return "Нет фото"
+    image_photo.short_description = 'Превью'
 
 @admin.register(TableCatalog2)
 class TableCatalog2Admin(admin.ModelAdmin):
     list_display = ['name', 'measurement', 'price', 'image_preview', 'is_active', 'created_at']
-    list_filter = ['name', 'price', 'is_active', 'created_at']
+    list_filter = ['price', 'is_active', 'created_at']
+    list_editable = ['price', 'is_active']
+
     def image_preview(self, obj):
         if obj.image:
             return mark_safe(f'<img src="{obj.image.url}" width="50" height="50" style="object-fit: cover;" />')
@@ -41,6 +55,8 @@ class DocumentationAdmin(admin.ModelAdmin):
 class CarouselSectionAdmin(admin.ModelAdmin):
     list_display = ['image_preview', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
+    list_editable = ['is_active']
+
     def image_preview(self, obj):
         if obj.image:
             return mark_safe(f'<img src="{obj.image.url}" width="80" height="80" style="object-fit: cover;" />')
