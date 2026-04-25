@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import CharField
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
-
+from decimal import Decimal
 
 class TableCatalog2(models.Model):
     image = models.ImageField(upload_to="Photo/catalog/cards", verbose_name="Изображение товара")
@@ -162,11 +162,10 @@ class ProductVariant (models.Model): #Конкретный вариант тов
         return self.product.name
 
     def calculate_volume_m3(self):
-        # Преобразуем ширину из миллиметров в метры
-        width_m = float(self.width.value) / 1000 if self.width else 0 # ширинa из миллиметров в метры
-        thickness_m = float(self.thickness) / 1000 # толщинa из миллиметров в метры
-        length_m = float(self.length)
-        return width_m * thickness_m * length_m # Возвращаем объем в м³
+        width_m = Decimal(self.width.value) / Decimal('1000') if self.width else Decimal('0')
+        thickness_m = Decimal(self.thickness) / Decimal('1000')
+        length_m = Decimal(self.length)
+        return (width_m * thickness_m * length_m).quantize(Decimal('0.0001'))  # Округление до 4 знаков
 
 class PlywoodCatalog(models.Model):
     image = models.ImageField(upload_to="Photo/catalog/plywood", verbose_name="Изображение товара")
