@@ -37,15 +37,17 @@ from urllib.request import Request, urlopen
 from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import viewsets, permissions
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 from .models import (
-    Product, ProductVariant, Cart, CartItem,
+    Product, ProductVariant, Cart, CartItem, Grade, Surface, Width,
     Order, OrderItem, CallbackRequest, Session, OrderStatus, CarouselSection, Documentation, TableCatalog2, PlywoodCatalog
 )
 
 from .serializers import (
-    ProductListSerializer, ProductDetailSerializer, ProductVariantSerializer,
-    CartSerializer, AddToCartSerializer, UpdateCartItemSerializer,
+    ProductListSerializer, ProductDetailSerializer, ProductVariantSerializer, GradeSerializer, SurfaceSerializer,
+    CartSerializer, AddToCartSerializer, UpdateCartItemSerializer, WidthSerializer,
     OrderSerializer, CreateOrderSerializer, CallbackRequestSerializer, CarouselSectionSerializer,
     DocumentationSerializer, TableCatalog2Serializer, PlywoodCatalogSerializer
 )
@@ -64,6 +66,112 @@ def get_or_create_session(request):
 
     session, _ = Session.objects.get_or_create(session_key=session_key) # Получаем сессию
     return session
+
+
+class AdminLoginView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+
+        # Проверяем, что пользователь имеет права администратора
+        if not user.is_staff:
+            return Response({'error': 'Доступ запрещен'}, status=403)
+
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email,
+            'is_staff': user.is_staff
+        })
+
+# АДМИНСКИЕ VIEWSET'S (FULL CRUD)
+class AdminProductViewSet(viewsets.ModelViewSet):
+    """Управление товарами (CRUD)"""
+    queryset = Product.objects.all()
+    serializer_class = ProductDetailSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminProductVariantViewSet(viewsets.ModelViewSet):
+    """Управление вариантами товаров (CRUD)"""
+    queryset = ProductVariant.objects.all()
+    serializer_class = ProductVariantSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminGradeViewSet(viewsets.ModelViewSet):
+    """Управление сортами (CRUD)"""
+    queryset = Grade.objects.all()
+    serializer_class = GradeSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminSurfaceViewSet(viewsets.ModelViewSet):
+    """Управление поверхностями (CRUD)"""
+    queryset = Surface.objects.all()
+    serializer_class = SurfaceSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminWidthViewSet(viewsets.ModelViewSet):
+    """Управление ширинами (CRUD)"""
+    queryset = Width.objects.all()
+    serializer_class = WidthSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminTableCatalog2ViewSet(viewsets.ModelViewSet):
+    """Управление таблицей каталога 2 (CRUD)"""
+    queryset = TableCatalog2.objects.all()
+    serializer_class = TableCatalog2Serializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminPlywoodCatalogViewSet(viewsets.ModelViewSet):
+    """Управление таблицей каталога 3 (CRUD)"""
+    queryset = PlywoodCatalog.objects.all()
+    serializer_class = PlywoodCatalogSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminDocumentationViewSet(viewsets.ModelViewSet):
+    """Управление документацией (CRUD)"""
+    queryset = Documentation.objects.all()
+    serializer_class = DocumentationSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminCarouselViewSet(viewsets.ModelViewSet):
+    """Управление каруселью (CRUD)"""
+    queryset = CarouselSection.objects.all()
+    serializer_class = CarouselSectionSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminOrderViewSet(viewsets.ModelViewSet):
+    """Управление заказами (CRUD + обновление статуса)"""
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        """Обновить статус заказа"""
+        order = self.get_object()
+        new_status_id = request.data.get('status_id')
+        if new_status_id:
+            order.status_id = new_status_id
+            order.save()
+            return Response({'message': 'Статус обновлён'})
+        return Response({'error': 'status_id required'}, status=400)
+
+class AdminCallbackViewSet(viewsets.ModelViewSet):
+    """Управление заявками на звонок (CRUD)"""
+    queryset = CallbackRequest.objects.all()
+    serializer_class = CallbackRequestSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    @action(detail=True, methods=['post'])
+    def mark_processed(self, request, pk=None):
+        """Отметить заявку как обработанную"""
+        callback = self.get_object()
+        callback.is_processed = True
+        callback.save()
+        return Response({'message': 'Заявка отмечена как обработанная'})
 
 class PlywoodCatalogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PlywoodCatalog.objects.filter(is_active = True)

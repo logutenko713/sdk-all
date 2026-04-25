@@ -23,7 +23,7 @@ class PlywoodCatalogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlywoodCatalog
-        fields = ['id', 'name', 'image_url', 'grade', 'grade_name', 'surface', 'surface_name',
+        fields = ['id', 'name', 'description', 'image_url', 'grade', 'grade_name', 'surface', 'surface_name',
                   'thickness', 'sheets_per_pack', 'price', 'created_at', 'is_active']
 
     def get_image_url(self, obj):
@@ -36,7 +36,7 @@ class TableCatalog2Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = TableCatalog2
-        fields = ['id', 'name', 'image_url', 'measurement', 'price', 'created_at', 'is_active']
+        fields = ['id', 'name', 'description', 'image_url', 'measurement', 'price', 'created_at', 'is_active']
 
     def get_image_url(self, obj):
         if obj.image:

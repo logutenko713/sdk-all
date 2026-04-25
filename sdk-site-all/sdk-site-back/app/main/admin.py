@@ -8,7 +8,8 @@ from .models import (
 
 @admin.register(PlywoodCatalog)
 class PlywoodCatalogAdmin(admin.ModelAdmin):
-    list_display = ['name', 'image_photo', 'grade', 'surface', 'thickness', 'sheets_per_pack', 'price', 'created_at', 'is_active']
+    list_display = ['name', 'description', 'image_photo', 'grade', 'surface', 'thickness', 'sheets_per_pack',
+                    'price', 'created_at', 'is_active']
     list_filter = ['is_active']
     list_editable = ['price', 'is_active']
 
@@ -20,7 +21,7 @@ class PlywoodCatalogAdmin(admin.ModelAdmin):
 
 @admin.register(TableCatalog2)
 class TableCatalog2Admin(admin.ModelAdmin):
-    list_display = ['name', 'measurement', 'price', 'image_preview', 'is_active', 'created_at']
+    list_display = ['name', 'description', 'measurement', 'price', 'image_preview', 'is_active', 'created_at']
     list_filter = ['price', 'is_active', 'created_at']
     list_editable = ['price', 'is_active']
 

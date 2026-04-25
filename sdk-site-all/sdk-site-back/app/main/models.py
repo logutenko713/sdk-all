@@ -7,6 +7,7 @@ from django.core.validators import FileExtensionValidator
 class TableCatalog2(models.Model):
     image = models.ImageField(upload_to="Photo/catalog/cards", verbose_name="Изображение товара")
     name = models.CharField(max_length=100, verbose_name="Продукция")
+    description = models.TextField(verbose_name="Описание", blank=True, null=True)  # Подробное описание товара
     measurement = models.CharField(max_length=100, verbose_name="Измерение")
     price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена за ед.")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
@@ -14,7 +15,7 @@ class TableCatalog2(models.Model):
 
     class Meta:
         verbose_name = "Таблица для каталога(2)"
-        verbose_name_plural = "Таблица для каталога(2)"
+        verbose_name_plural = "Таблицы для каталога(2)"
 
     def __str__(self):
         return self.name
@@ -55,11 +56,13 @@ class CarouselSection(models.Model):
 # Товар
 class Product (models.Model):
     name = models.CharField(max_length=100, verbose_name="Название") # Название товара (например, "Доска обрезная")
-    category = models.CharField(max_length=100, verbose_name="Категория") # Категория товара (например, "Пиломатериалы")
-    description = models.TextField(verbose_name="Описание", blank=True)# Подробное описание товара
+    category = models.CharField(max_length=100, verbose_name="Категория", blank=True, null = True) # Категория товара (например,
+    # "Пиломатериалы")
+    description = models.TextField(verbose_name="Описание", blank=True, null = True)# Подробное описание товара
     is_active = models.BooleanField(default=True, verbose_name="Активен") # Флаг активности - показывать ли товар на сайте
     # Объем от которого начинает действовать скидка (в кубометрах)
-    discount_volume = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Объем от скидки (м³)")
+    discount_volume = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Объем от скидки ("
+                                                                                                  "м³)", blank=True, null = True)
     # Изображение товара
     image = models.ImageField(verbose_name="Изображение товара", upload_to="Photo/cards", blank = True, null=True)
     # Дата создания товара в системе
@@ -126,10 +129,12 @@ class ProductVariant (models.Model): #Конкретный вариант тов
     width = models.ForeignKey(Width, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Ширина (мм)") #
     # Ширина
     # этого варианта
-    thickness = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Толщина (мм)") # Толщина в миллиметрах
-    length = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Длина (м)") # Длина в метрах
-    price_per_m3 = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена за м³") # Цена за кубический метр в рублях
-    sheets_per_pack = models.PositiveIntegerField(verbose_name="Количество листов в упаковке (шт)",default=1) # Сколько
+    thickness = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Толщина (мм)", blank=True, null = True) # Толщина в
+    # миллиметрах
+    length = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Длина (м)",blank=True, null = True) # Длина в метрах
+    price_per_m3 = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена за м³",blank=True, null = True) # Цена за
+    # кубический метр в рублях
+    sheets_per_pack = models.PositiveIntegerField(verbose_name="Количество листов в упаковке (шт)",default=1,blank=True, null = True) # Сколько
     # листов/досок в одной пачке
     is_active = models.BooleanField(default=True, verbose_name="Активен") # Активен ли этот вариант (показывать на сайте или нет)
 
@@ -137,8 +142,8 @@ class ProductVariant (models.Model): #Конкретный вариант тов
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Вариант товара"
-        verbose_name_plural = "Варианты товаров"
+        verbose_name = "Таблица для каталога(1)"
+        verbose_name_plural = "Таблицы для каталога(1)"
 
         #не может быть двух одинаковых вариантов
         constraints = [
@@ -154,7 +159,7 @@ class ProductVariant (models.Model): #Конкретный вариант тов
         ]
 
     def __str__(self):
-        return f"{self.product.name} - {self.thickness}x{self.width}x{self.length}"
+        return self.product.name
 
     def calculate_volume_m3(self):
         # Преобразуем ширину из миллиметров в метры
@@ -176,10 +181,11 @@ class PlywoodCatalog(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена товара")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
+    description = models.TextField(verbose_name="Описание", blank=True, null=True)  # Подробное описание товара
 
     class Meta:
         verbose_name = "Таблица для каталога(3)"
-        verbose_name_plural = "Таблица для каталога(3)"
+        verbose_name_plural = "Таблицы для каталога(3)"
 
     def __str__(self):
         return f"{self.name} -- {self.price}"
