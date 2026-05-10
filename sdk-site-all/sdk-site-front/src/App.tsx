@@ -7,6 +7,10 @@ import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import AdminProducts from './components/AdminProducts/AdminProducts';
 import AdminOrders from './components/AdminOrders/AdminOrders';
 import AdminSettings from './components/AdminSettings/AdminSettings';
+import AdminVariants from './components/AdminVariants/AdminVariants';
+import AdminCarousel from './components/AdminCarousel/AdminCarousel';
+import AdminDocs from './components/AdminDocs/AdminDocs';
+import CheckoutPage from './pages/CheckoutPage';
 
 import {
   Header,
@@ -16,13 +20,9 @@ import {
   Catalog
 } from '@components';
 
-
-
 import './App.css'
 
-
 function App() {
-
   return (
     <CartProvider>
       <Router>
@@ -32,6 +32,7 @@ function App() {
             <Route path="/" element={<MainContent />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/catalog" element={<Catalog />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={
               <PrivateRoute>
@@ -42,6 +43,9 @@ function App() {
               <Route path="products" element={<AdminProducts />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="variants" element={<AdminVariants />} />
+              <Route path="carousel" element={<AdminCarousel />} />
+              <Route path="docs" element={<AdminDocs />} />
             </Route>
           </Routes>
           <Footer />

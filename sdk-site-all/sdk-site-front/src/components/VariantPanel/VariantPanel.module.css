@@ -1,0 +1,169 @@
+.panel {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+/* Заголовок с коричневым фоном (как выделенная ячейка) */
+.headerRow {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #925343;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.itemRow {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.colDim { flex: 2; }
+.colWood { flex: 1; }
+.colGrade { flex: 1; }
+.colPrice { flex: 1; }
+.colQty { flex: 1; display: flex; align-items: center; gap: 8px; }
+.colAction { flex: 0.3; text-align: center; }
+
+.qtyBtn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #ffffff !important;
+    color: #2c3e50 !important;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.qtyBtn:hover {
+    background-color: #f0f0f0 !important;
+    border-color: #925343;
+}
+
+.qtyValue {
+    min-width: 30px;
+    text-align: center;
+}
+
+.removeBtn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #999;
+}
+
+.removeBtn:hover {
+    color: #f44336;
+}
+
+.actionRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
+}
+
+.total {
+    font-size: 16px;
+}
+
+.addBtn {
+    padding: 10px 24px;
+    background: #925343;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.addBtn:hover {
+    background: #7a4536;
+}
+
+@media (max-width: 768px) {
+    .panel {
+        padding: 12px;
+        font-size: 12px;
+    }
+    
+    .headerRow, .itemRow {
+        gap: 8px;
+    }
+    
+    .colDim { flex: 1.5; }
+    .colWood { flex: 1; }
+    .colGrade { flex: 0.8; }
+    .colPrice { flex: 0.8; }
+    .colQty { flex: 0.8; }
+    .colAction { flex: 0.3; }
+    
+    .qtyBtn {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+    
+    .addBtn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
+/* ================== МОБИЛЬНАЯ АДАПТАЦИЯ ================== */
+@media (max-width: 768px) {
+    .panel {
+        padding: 12px;
+        font-size: 12px;
+    }
+    
+    .headerRow, .itemRow {
+        gap: 8px;
+    }
+    
+    .colDim { flex: 1.5; }
+    .colWood { flex: 1; }
+    .colGrade { flex: 0.8; }
+    .colPrice { flex: 0.8; }
+    .colQty { flex: 0.8; }
+    .colAction { flex: 0.3; }
+    
+    .qtyBtn {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .addBtn, .cancelBtn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    
+    .actionRow {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .buttons {
+        justify-content: space-between;
+    }
+}

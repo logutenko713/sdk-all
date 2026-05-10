@@ -116,27 +116,19 @@ class Width (models.Model): #ширина в мм
         return f"{self.value} мм"
 
 
-class ProductVariant (models.Model): #Конкретный вариант товара с определенными параметрами и ценой
-    # Связь с основным товаром
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants",
-                                verbose_name="Товар")  # product.variants.all(
-    # ) - все варианты товара
-    # PROTECT означает: нельзя удалить сорт, если он используется в варианте
-    grade = models.ForeignKey(Grade, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Сорт") # Сорт
-    # конкретного варианта (может быть пустым)
-    surface = models.ForeignKey(Surface, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Тип "
-                                                                                                       "поверхности")#Тип поверхности этого варианта
-    width = models.ForeignKey(Width, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Ширина (мм)") #
-    # Ширина
-    # этого варианта
-    thickness = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Толщина (мм)", blank=True, null = True) # Толщина в
-    # миллиметрах
-    length = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Длина (м)",blank=True, null = True) # Длина в метрах
-    price_per_m3 = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена за м³",blank=True, null = True) # Цена за
-    # кубический метр в рублях
-    sheets_per_pack = models.PositiveIntegerField(verbose_name="Количество листов в упаковке (шт)",default=1,blank=True, null = True) # Сколько
-    # листов/досок в одной пачке
-    is_active = models.BooleanField(default=True, verbose_name="Активен") # Активен ли этот вариант (показывать на сайте или нет)
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants", verbose_name="Товар")
+    
+    # ⬇️ ИЗМЕНЕНИЯ: теперь это простые текстовые поля
+    grade = models.CharField(max_length=100, blank=True, null=True, verbose_name="Сорт")
+    surface = models.CharField(max_length=100, blank=True, null=True, verbose_name="Тип поверхности")
+    width = models.CharField(max_length=50, blank=True, null=True, verbose_name="Ширина (мм)")
+    
+    thickness = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Толщина (мм)", blank=True, null=True)
+    length = models.DecimalField(max_digits=6, decimal_places=1, verbose_name="Длина (м)", blank=True, null=True)
+    price_per_m3 = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена за м³", blank=True, null=True)
+    sheets_per_pack = models.PositiveIntegerField(verbose_name="Количество листов в упаковке (шт)", default=1, blank=True, null=True)
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -144,16 +136,12 @@ class ProductVariant (models.Model): #Конкретный вариант тов
     class Meta:
         verbose_name = "Таблица для каталога(1)"
         verbose_name_plural = "Таблицы для каталога(1)"
-
-        #не может быть двух одинаковых вариантов
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "grade", "surface", "width", "thickness", "length"],
                 name="unique_product_variant"
             )
         ]
-
-        # Индексы для ускорения поиска вариантов товара
         indexes = [
             models.Index(fields=["product", "is_active"]),
         ]
@@ -162,11 +150,13 @@ class ProductVariant (models.Model): #Конкретный вариант тов
         return self.product.name
 
     def calculate_volume_m3(self):
-        width_m = Decimal(self.width.value) / Decimal('1000') if self.width else Decimal('0')
-        thickness_m = Decimal(self.thickness) / Decimal('1000')
-        length_m = Decimal(self.length)
-        return (width_m * thickness_m * length_m).quantize(Decimal('0.0001'))  # Округление до 4 знаков
-
+        try:
+            width_m = Decimal(self.width) / Decimal('1000') if self.width else Decimal('0')
+        except (ValueError, TypeError):
+            width_m = Decimal('0')
+        thickness_m = Decimal(self.thickness) / Decimal('1000') if self.thickness else Decimal('0')
+        length_m = Decimal(self.length) if self.length else Decimal('0')
+        return (width_m * thickness_m * length_m).quantize(Decimal('0.0001'))
 class PlywoodCatalog(models.Model):
     image = models.ImageField(upload_to="Photo/catalog/plywood", verbose_name="Изображение товара")
     name = models.CharField(max_length=100, verbose_name="Продукция")

@@ -159,3 +159,59 @@
     font-weight: 600;
     color:#fff;
 }
+
+/* ================== МОБИЛЬНАЯ АДАПТАЦИЯ ================== */
+@media (max-width: 768px) {
+    .priceContent {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -16px;
+        padding: 0 16px;
+    }
+    
+    .table {
+        min-width: 650px;
+        width: 100%;
+    }
+    
+    .table td, .table th {
+        padding: 8px 6px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    
+    .title {
+        font-size: 28px;
+    }
+    
+    .productWrap {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .leftColumn {
+        flex: auto;
+        text-align: center;
+    }
+    
+    .imagePlaceholder {
+        max-width: 200px;
+        margin: 0 auto;
+    }
+    
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .navItem {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .container, .content {
+        padding: 16px;
+    }
+}

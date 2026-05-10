@@ -1,283 +1,83 @@
 .mapSection {
-    padding: 80px 0;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    position: relative;
-}
-
-.mapSection::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #7B4538, #925343, #7B4538);
+    padding: 60px 0;
+    background: #fafafa;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-.mapHeader {
+.contactsBlock {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
-.mapTitle {
-    font-size: 3rem;
-    color: #7B4538;
-    margin-bottom: 1rem;
+.title {
+    font-size: 36px;
     font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 24px;
 }
 
-.mapSubtitle {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 2rem;
-    line-height: 1.6;
-}
-
-.contactInfo {
+.contactsInfo {
     display: flex;
     justify-content: center;
-    gap: 3rem;
     flex-wrap: wrap;
+    gap: 32px;
 }
 
 .contactItem {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.1rem;
+    gap: 8px;
+    font-size: 16px;
     color: #333;
-    background: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.contactIcon {
-    font-size: 1.3rem;
+.icon {
+    font-size: 20px;
+}
+
+.mapWrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .mapContainer {
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    margin-bottom: 40px;
-    border: 3px solid white;
-}
-
-.yaMap {
-    border-radius: 18px;
+    width: 100%;
+    height: 400px;
 }
 
 .mapPlaceholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 400px;
-    background: #f8f9fa;
+    height: 100%;
+    background: #f0f0f0;
     color: #666;
-    font-size: 1.1rem;
+    border-radius: 12px;
 }
 
-/* Стили для балуна (всплывающего окна на карте) */
-.balloon {
-    padding: 1rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-.balloon h3 {
-    color: #7B4538;
-    margin: 0 0 0.5rem 0;
-    font-size: 1.1rem;
-}
-
-.balloon p {
-    margin: 0.25rem 0;
-    color: #333;
-}
-
-/* Футер карты */
-.mapFooter {
-    margin-top: 3rem;
-}
-
-.infoGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-}
-
-.infoCard {
-    background: white;
-    padding: 2rem;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.infoCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(123, 69, 56, 0.15);
-    border-color: #7B4538;
-}
-
-.infoIcon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.infoCard h4 {
-    color: #7B4538;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-}
-
-.infoCard p {
-    color: #666;
-    line-height: 1.5;
-    margin: 0;
-}
-/*Все стили*/
-.infoList,
-.contacts,
-.conditions {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.infoList li,
-.contacts span,
-.conditions span {
-    margin: 0.5rem 0;
-    color: #666;
-}
-
-.contactGrid,
-.testimonialGrid,
-.faqGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-}
-
-.scheduleItem {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.5rem 0;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.ctaSection {
-    background: linear-gradient(135deg, #7B4538, #925343);
-    color: white;
-    padding: 3rem;
-    border-radius: 15px;
-    text-align: center;
-}
-
-.ctaButtons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.primaryBtn,
-.secondaryBtn {
-    padding: 1rem 2rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.primaryBtn {
-    background: white;
-    color: #7B4538;
-    border: none;
-}
-
-.secondaryBtn {
-    background: transparent;
-    color: white;
-    border: 2px solid white;
-}
-
-.testimonial {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    border-left: 4px solid #7B4538;
-}
-
-.testimonialAuthor {
-    margin-top: 1rem;
-    font-style: italic;
-    color: #666;
-}
-
-.faqItem {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
-}
-
-.faqItem h4 {
-    color: #7B4538;
-    margin-bottom: 0.5rem;
-}
 /* Адаптивность */
 @media (max-width: 768px) {
     .mapSection {
-        padding: 60px 0;
+        padding: 40px 0;
     }
-
-    .mapTitle {
-        font-size: 2.2rem;
-    }
-
-    .contactInfo {
+    .contactsInfo {
         flex-direction: column;
-        gap: 1rem;
         align-items: center;
+        gap: 16px;
     }
-
+    .title {
+        font-size: 28px;
+    }
     .contactItem {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
+        font-size: 14px;
     }
-
-    .infoGrid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .infoCard {
-        padding: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .mapTitle {
-        font-size: 1.8rem;
-    }
-
-    .mapSubtitle {
-        font-size: 1rem;
-    }
-
-    .container {
-        padding: 0 15px;
+    .mapContainer {
+        height: 250px;
     }
 }

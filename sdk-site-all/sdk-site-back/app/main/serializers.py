@@ -101,24 +101,19 @@ class ProductListSerializer(serializers.ModelSerializer): #Краткая инф
             return obj.image.url
         return None
 
-class ProductVariantSerializer(serializers.ModelSerializer): # Информация о конкретном товаре с его параметрами
-    # Связанные объекты преобразуем в вложенный json (для чтения)
-    grade = GradeSerializer(read_only=True)
-    surface = SurfaceSerializer(read_only=True)
-    width = WidthSerializer(read_only=True)
+class ProductVariantSerializer(serializers.ModelSerializer):
     volume_m3 = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductVariant
         fields = [
-            'id', 'grade', 'surface', 'width', 'thickness',
+            'id', 'product', 'grade', 'surface', 'width', 'thickness',
             'length', 'price_per_m3', 'sheets_per_pack',
             'is_active', 'volume_m3'
         ]
 
-    def get_volume_m3(self, obj): # Метод для вычислениия объема одной единицы товара
+    def get_volume_m3(self, obj):
         return obj.calculate_volume_m3()
-
 
 class ProductDetailSerializer(serializers.ModelSerializer): #Подробная информация о товаре для каталога
     image = serializers.SerializerMethodField()

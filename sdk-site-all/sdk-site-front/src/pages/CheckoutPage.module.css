@@ -1,0 +1,61 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.content {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.formSection {
+    flex: 2;
+    min-width: 280px;
+}
+
+.formSection form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formSection input,
+.formSection textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.formSection button {
+    padding: 14px;
+    background: #925343;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.cartSection {
+    flex: 1;
+    min-width: 280px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.cartItem {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.total {
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 16px;
+    text-align: right;
+}

@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useCart } from '../../contexts/CartContext';
+import { apiService } from '../../services/api';
 import styles from './ProductCatalog.module.css';
 import VariantPanel from '../VariantPanel/VariantPanel';
-import { useCart } from '../../contexts/CartContext';
 
 type Tab = 'description' | 'price' | 'properties' | 'documents';
 
-interface Props {
+interface ChipProductProps {
+    productId: number;
     title: string;
 }
 
-const ChipProduct: React.FC<Props> = ({ title }) => {
+const ChipProduct: React.FC<ChipProductProps> = ({ productId, title }) => {
     const [activeTab, setActiveTab] = useState<Tab>('price');
+    const { addItem, openCart } = useCart();
+    const [variants, setVariants] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [items, setItems] = useState<any[]>([]);
-    const { addItem } = useCart();
 
-    const chipData = [
-        { id: 'chip-bag', name: 'Щепа + мешок', unit: 'Мешок', price: 80 },
-        { id: 'chip-bulk', name: 'Щепа (дробленная)', unit: 'м³', price: 300 },
-    ];
+    useEffect(() => {
+        apiService.getProductVariants(productId)
+            .then(data => {
+                setVariants(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    }, [productId]);
 
     const addOrUpdateItem = (variantData: any) => {
         const existingIndex = items.findIndex(item => item.id === variantData.id);
@@ -58,16 +69,16 @@ const ChipProduct: React.FC<Props> = ({ title }) => {
         
         items.forEach(item => {
             const product = {
-                id: item.id,
+                id: productId,
                 name: title,
                 image: '',
             };
             
             const variant = {
-                id: item.id,
+                id: item.variantId,
                 dimensions: item.dimensions,
-                woodType: item.woodType,
-                grade: item.grade,
+                woodType: 'Щепа',
+                grade: '—',
                 price: item.price,
                 stock: 1000,
             };
@@ -77,9 +88,10 @@ const ChipProduct: React.FC<Props> = ({ title }) => {
         
         setItems([]);
         setSelectedRows([]);
+        openCart();
     };
 
-    const handlePriceClick = (rowIdx: number, item: typeof chipData[0]) => {
+    const handlePriceClick = (rowIdx: number, variant: any) => {
         const alreadySelected = selectedRows.includes(rowIdx);
         
         if (alreadySelected) {
@@ -90,16 +102,21 @@ const ChipProduct: React.FC<Props> = ({ title }) => {
         
         const variantData = {
             id: `chip-${rowIdx}`,
-            dimensions: item.name,
+            variantId: variant.id,
+            productId: productId,
+            dimensions: variant.name || title,
             woodType: 'Щепа',
-            grade: '',
-            price: item.price,
+            grade: '—',
+            price: variant.price_per_m3 || variant.price,
             rowIdx: rowIdx,
             colIdx: 0,
         };
         
         addOrUpdateItem(variantData);
     };
+
+    if (loading) return <div>Загрузка...</div>;
+    if (variants.length === 0) return null;
 
     return (
         <main className={styles.container}>
@@ -126,15 +143,23 @@ const ChipProduct: React.FC<Props> = ({ title }) => {
                             <div className={styles.priceContent}>
                                 <table className={styles.table}>
                                     <thead>
-                                        <tr><th>Продукция</th><th>Измерение</th><th>Цена за ед.</th></tr>
+                                        <tr>
+                                            <th>Продукция</th>
+                                            <th>Измерение</th>
+                                            <th>Цена за ед.</th>
+                                        </tr>
                                     </thead>
                                     <tbody>
-                                        {chipData.map((item, rowIdx) => (
-                                            <tr key={rowIdx}>
-                                                <td>{item.name}</td>
-                                                <td>{item.unit}</td>
-                                                <td onClick={() => handlePriceClick(rowIdx, item)} className={selectedRows.includes(rowIdx) ? styles.selectedCell : ''} style={{ cursor: 'pointer' }}>
-                                                    {item.price} ₽
+                                        {variants.map((variant, idx) => (
+                                            <tr key={idx}>
+                                                <td>{variant.name || title}</td>
+                                                <td>{variant.unit || 'м³'}</td>
+                                                <td 
+                                                    onClick={() => handlePriceClick(idx, variant)}
+                                                    className={selectedRows.includes(idx) ? styles.selectedCell : ''}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    {variant.price_per_m3 || variant.price} ₽
                                                 </td>
                                             </tr>
                                         ))}

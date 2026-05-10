@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
 import type { CartItem, Product, ProductVariant } from '@types';
-import { apiService } from '@services/api';
+import { apiService } from '../services/api';
 
-// Типы для действий (actions)
 type CartAction =
     | { type: 'ADD_ITEM'; payload: CartItem }
     | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
@@ -12,13 +11,11 @@ type CartAction =
     | { type: 'OPEN_CART' }
     | { type: 'CLOSE_CART' };
 
-// Тип для состояния корзины
 interface CartState {
     items: CartItem[];
     isOpen: boolean;
 }
 
-// Тип для контекста
 interface CartContextType {
     state: CartState;
     addItem: (product: Product, variant: ProductVariant, quantity: number) => void;
@@ -31,23 +28,18 @@ interface CartContextType {
     getTotalItems: () => number;
 }
 
-// Создаем контекст
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Начальное состояние
 const initialState: CartState = {
     items: [],
     isOpen: false
 };
 
-// Редуктор для управления состоянием
 function cartReducer(state: CartState, action: CartAction): CartState {
     switch (action.type) {
         case 'ADD_ITEM':
             const existingItem = state.items.find(item => item.id === action.payload.id);
-
             if (existingItem) {
-                // Если товар уже есть, увеличиваем количество
                 return {
                     ...state,
                     items: state.items.map(item =>
@@ -57,13 +49,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
                     )
                 };
             } else {
-                // Если товара нет, добавляем новый
                 return {
                     ...state,
                     items: [...state.items, action.payload]
                 };
             }
-
         case 'UPDATE_QUANTITY':
             return {
                 ...state,
@@ -73,48 +63,37 @@ function cartReducer(state: CartState, action: CartAction): CartState {
                         : item
                 )
             };
-
         case 'REMOVE_ITEM':
             return {
                 ...state,
                 items: state.items.filter(item => item.id !== action.payload)
             };
-
         case 'CLEAR_CART':
             return {
                 ...state,
                 items: []
             };
-
         case 'SET_ITEMS':
             return {
                 ...state,
                 items: action.payload
             };
-
         case 'OPEN_CART':
             return { ...state, isOpen: true };
         case 'CLOSE_CART':
             return { ...state, isOpen: false };
-
         default:
             return state;
     }
 }
 
-// Провайдер контекста
-interface CartProviderProps {
-    children: ReactNode;
-}
-
-export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [state, dispatch] = useReducer(cartReducer, initialState);
 
     const syncItems = (items: CartItem[]) => {
         dispatch({ type: 'SET_ITEMS', payload: items });
     };
 
-    // Функция для добавления товара
     const addItem = (product: Product, variant: ProductVariant, quantity: number) => {
         const cartItem: CartItem = {
             id: `${product.id}-${variant.id}`,
@@ -139,7 +118,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             });
     };
 
-    // Функция для обновления количества
     const updateQuantity = (id: string, quantity: number) => {
         if (quantity <= 0) {
             removeItem(id);
@@ -154,7 +132,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             });
     };
 
-    // Функция для удаления товара
     const removeItem = (id: string) => {
         dispatch({ type: 'REMOVE_ITEM', payload: id });
 
@@ -165,7 +142,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             });
     };
 
-    // Функция для очистки корзины
     const clearCart = () => {
         dispatch({ type: 'CLEAR_CART' });
 
@@ -176,7 +152,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             });
     };
 
-    // Функции для открытия/закрытия корзины
     const openCart = () => {
         dispatch({ type: 'OPEN_CART' });
     };
@@ -185,12 +160,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         dispatch({ type: 'CLOSE_CART' });
     };
 
-    // Функция для получения общей стоимости
     const getTotalPrice = (): number => {
         return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
 
-    // Функция для получения общего количества товаров
     const getTotalItems = (): number => {
         return state.items.reduce((total, item) => total + item.quantity, 0);
     };
@@ -214,7 +187,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     );
 };
 
-// Хук для использования контекста
 export const useCart = (): CartContextType => {
     const context = useContext(CartContext);
     if (context === undefined) {

@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { apiService } from '../../services/api';
 import styles from './FeedbackCarousel.module.css';
 import sawIcon from '@assets/saw-dot.svg';
 
 const FeedbackCarousel: React.FC = () => {
+    const [slides, setSlides] = useState<any[]>([]);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-    const [name, setName] = useState('');
+    const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
-
-    const totalSlides = 3;
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isAutoPlaying) return;
+        apiService.getCarousel()
+            .then(data => {
+                console.log('Загружено слайдов:', data.length);
+                setSlides(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    }, []);
+
+    const totalSlides = slides.length + 1;
+
+    useEffect(() => {
+        if (!isAutoPlaying || totalSlides === 0) return;
         const interval = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % totalSlides);
         }, 5000);
@@ -24,8 +40,7 @@ const FeedbackCarousel: React.FC = () => {
 
     const dots = Array.from({ length: totalSlides }, (_, i) => i);
 
-    // Обработчики формы
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value);
+    const handleFullNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value);
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let value = e.target.value.replace(/\D/g, '');
@@ -51,12 +66,12 @@ const FeedbackCarousel: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name.trim() || phone.length !== 11) {
-            alert('Пожалуйста, заполните все поля корректно');
+        if (!fullName.trim() || phone.length !== 11) {
+            alert('Пожалуйста, заполните ФИО и номер телефона');
             return;
         }
-        console.log('Обратный звонок:', { name, phone });
-        setName('');
+        console.log('Обратный звонок:', { fullName, phone });
+        setFullName('');
         setPhone('');
     };
 
@@ -67,15 +82,15 @@ const FeedbackCarousel: React.FC = () => {
                     <div className={styles.callbackLeft}>
                         <h2 className={styles.callbackTitle}>Нужна консультация?</h2>
                         <p className={styles.callbackSubtitle}>
-                            Оставьте свой номер — мы перезвоним и ответим на все вопросы
+                            Оставьте свои данные — мы перезвоним и ответим на все вопросы
                         </p>
                     </div>
                     <form className={styles.callbackForm} onSubmit={handleSubmit}>
                         <input
                             type="text"
-                            placeholder="Имя"
-                            value={name}
-                            onChange={handleNameChange}
+                            placeholder="ФИО"
+                            value={fullName}
+                            onChange={handleFullNameChange}
                             className={styles.callbackInput}
                             required
                         />
@@ -93,14 +108,23 @@ const FeedbackCarousel: React.FC = () => {
                     </form>
                 </div>
             );
-        } else {
-            return (
-                <div className={styles.placeholderSlide}>
-                    <p>Слайд {index + 1}</p>
-                </div>
-            );
         }
+        
+        const slide = slides[index - 1];
+        const imageUrl = slide?.image ? `http://127.0.0.1:8000${slide.image}` : null;
+        
+        return (
+            <div className={styles.imageSlide}>
+                {imageUrl ? (
+                    <img src={imageUrl} alt="Слайд" className={styles.slideImage} />
+                ) : (
+                    <div className={styles.placeholderSlide}>Слайд {index}</div>
+                )}
+            </div>
+        );
     };
+
+    if (loading) return <div>Загрузка карусели...</div>;
 
     return (
         <section
@@ -122,14 +146,13 @@ const FeedbackCarousel: React.FC = () => {
                     </div>
 
                     <div className={styles.carouselControls}>
-                        <button className={styles.controlButton} onClick={prevSlide} aria-label="Предыдущий слайд">‹</button>
+                        <button className={styles.controlButton} onClick={prevSlide}>‹</button>
                         <div className={styles.dots}>
                             {dots.map((index) => (
                                 <button
                                     key={index}
                                     className={`${styles.dot} ${currentSlide === index ? styles.active : ''}`}
                                     onClick={() => goToSlide(index)}
-                                    aria-label={`Перейти к слайду ${index + 1}`}
                                 >
                                     {currentSlide === index && (
                                         <img src={sawIcon} alt="Активный слайд" className={styles.sawIcon} />
@@ -137,7 +160,7 @@ const FeedbackCarousel: React.FC = () => {
                                 </button>
                             ))}
                         </div>
-                        <button className={styles.controlButton} onClick={nextSlide} aria-label="Следующий слайд">›</button>
+                        <button className={styles.controlButton} onClick={nextSlide}>›</button>
                     </div>
                 </div>
             </div>

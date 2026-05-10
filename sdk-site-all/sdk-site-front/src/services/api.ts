@@ -20,6 +20,8 @@ class ApiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
+      console.log(`[API] ${options.method || 'GET'} ${url}`);
+      
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
@@ -30,6 +32,8 @@ class ApiService {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[API] Ошибка ${response.status}:`, errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -111,6 +115,19 @@ class ApiService {
     return rawList.map((item: any) => this.mapProduct(item));
   }
 
+  async getProductVariants(productId: number): Promise<any[]> {
+    const data = await this.request(`/products/${productId}/variants/`);
+    return data;
+  }
+
+  async getCarousel(): Promise<any[]> {
+    const data = await this.request('/carousel/');
+    if (data && Array.isArray(data.results)) {
+      return data.results;
+    }
+    return Array.isArray(data) ? data : [];
+  }
+
   private mapCartItem(apiItem: any): CartItem {
     const variant = apiItem?.variant || {};
     const widthValue = variant?.width?.value ?? '-';
@@ -138,10 +155,25 @@ class ApiService {
   }
 
   async addToCart(variantId: string, quantity: number): Promise<CartItem[]> {
+    const variantIdNum = parseInt(variantId, 10);
+    if (isNaN(variantIdNum)) {
+      console.error('Ошибка: variantId не число:', variantId);
+      throw new Error('Invalid variantId');
+    }
+    
+    const payload = { 
+      variant_id: variantIdNum, 
+      quantity: Number(quantity) 
+    };
+    
+    console.log('[API] addToCart payload:', payload);
+    
     const data = await this.requestWithSession('/api/cart/add_item/', {
       method: 'POST',
-      body: JSON.stringify({ variant_id: Number(variantId), quantity }),
+      body: JSON.stringify(payload),
     });
+
+    console.log('[API] addToCart response:', data);
 
     if (data?.session_key) {
       this.setSessionKey(data.session_key);
@@ -180,12 +212,12 @@ class ApiService {
     email?: string;
     comment?: string;
   }) {
+    console.log('[API] createOrder payload:', payload);
     return this.requestWithSession('/api/orders/', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
   }
-
 }
 
 export const apiService = new ApiService();

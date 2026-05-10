@@ -318,3 +318,30 @@
         padding: 15px;
     }
 }
+
+/* ================== МОБИЛЬНАЯ АДАПТАЦИЯ ================== */
+@media (max-width: 768px) {
+    .cart {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .cartItem {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .itemControls {
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .cartHeader {
+        padding: 16px;
+    }
+    
+    .cartContent {
+        padding: 16px;
+    }
+}

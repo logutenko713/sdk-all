@@ -1,34 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useCart } from '../../contexts/CartContext';
+import { apiService } from '../../services/api';
 import styles from './ProductCatalog.module.css';
 import VariantPanel from '../VariantPanel/VariantPanel';
-import { useCart } from '../../contexts/CartContext';
 
 type Tab = 'description' | 'price' | 'properties' | 'documents';
 
-interface Props {
+interface BoardProductProps {
+    productId: number;
     title: string;
 }
 
-const BoardProduct: React.FC<Props> = ({ title }) => {
+const BoardProduct: React.FC<BoardProductProps> = ({ productId, title }) => {
     const [activeTab, setActiveTab] = useState<Tab>('price');
-
-    // Состояния для выделенных ячеек
+    const { addItem, openCart } = useCart();
+    const [variants, setVariants] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCells, setSelectedCells] = useState<{ row: number; col: number }[]>([]);
-    
-    // Состояния для панели выбора количества
     const [items, setItems] = useState<any[]>([]);
-    const { addItem } = useCart();
 
-    // Данные для таблицы досок (исходный формат)
-    const priceData = [
-        { sort: 'I-III', width: 100, prices: ['150 р.', '225 р.', '300 р.', '450 р.'] },
-        { sort: 'I-III', width: 120, prices: ['180 р.', '270 р.', '360 р.', '540 р.'] },
-        { sort: 'I-III', width: 150, prices: ['225 р.', '340 р.', '450 р.', '675 р.'] },
-        { sort: 'I-III', width: 180, prices: ['270 р.', '405 р.', '540 р.', '810 р.'] },
-        { sort: 'I-III', width: 200, prices: ['300 р.', '450 р.', '600 р.', '900 р.'] },
-    ];
+    useEffect(() => {
+        apiService.getProductVariants(productId)
+            .then(data => {
+                setVariants(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    }, [productId]);
 
-    // Функции для панели
+    const groupVariants = () => {
+        const rowsMap = new Map();
+        const colsSet = new Set();
+
+        variants.forEach(v => {
+            const width = v.width?.value || v.width;
+            const thickness = v.thickness;
+            const length = v.length;
+            const price = v.price_per_m3;
+            const variantId = v.id;
+            
+            const rowKey = width;
+            const colKey = `${thickness}×${length}`;
+            
+            if (!rowsMap.has(rowKey)) {
+                rowsMap.set(rowKey, { width: rowKey, prices: {}, variantIds: {} });
+            }
+            rowsMap.get(rowKey).prices[colKey] = price;
+            rowsMap.get(rowKey).variantIds[colKey] = variantId;
+            colsSet.add(colKey);
+        });
+
+        return {
+            rows: Array.from(rowsMap.values()).sort((a, b) => a.width - b.width),
+            cols: Array.from(colsSet).sort()
+        };
+    };
+
     const addOrUpdateItem = (variantData: any) => {
         const existingIndex = items.findIndex(item => item.id === variantData.id);
         if (existingIndex >= 0) {
@@ -71,16 +101,16 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
         
         items.forEach(item => {
             const product = {
-                id: item.id,
+                id: productId,
                 name: title,
                 image: '',
             };
             
             const variant = {
-                id: item.id,
+                id: item.variantId,
                 dimensions: item.dimensions,
-                woodType: item.woodType,
-                grade: item.grade,
+                woodType: 'Сосна/Ель',
+                grade: 'I-III',
                 price: item.price,
                 stock: 1000,
             };
@@ -90,18 +120,10 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
         
         setItems([]);
         setSelectedCells([]);
+        openCart();
     };
 
-    // Извлечение числового значения из цены (например "150 р." → 150)
-    const parsePrice = (priceStr: string): number => {
-        return parseInt(priceStr.replace(' р.', ''), 10);
-    };
-
-    // Обработчик клика по цене
-    const handlePriceClick = (rowIdx: number, colIdx: number, priceStr: string) => {
-        const price = parsePrice(priceStr);
-        
-        // Логика выделения
+    const handlePriceClick = (rowIdx: number, colIdx: number, price: number, variantId: number, colKey: string, rowWidth: number) => {
         const alreadySelected = selectedCells.some(
             cell => cell.row === rowIdx && cell.col === colIdx
         );
@@ -114,12 +136,13 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
             setSelectedCells([...selectedCells, { row: rowIdx, col: colIdx }]);
         }
         
-        // Логика добавления в панель
         const variantData = {
             id: `board-${rowIdx}-${colIdx}`,
-            dimensions: `${priceData[rowIdx].width}×25×${colIdx === 0 || colIdx === 2 ? '4' : '6'} м`,
+            variantId: variantId,
+            productId: productId,
+            dimensions: `${rowWidth}×${colKey} мм`,
             woodType: 'Сосна/Ель',
-            grade: priceData[rowIdx].sort,
+            grade: 'I-III',
             price: price,
             rowIdx: rowIdx,
             colIdx: colIdx,
@@ -128,10 +151,14 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
         addOrUpdateItem(variantData);
     };
 
+    if (loading) return <div>Загрузка...</div>;
+    if (variants.length === 0) return null;
+
+    const grouped = groupVariants();
+
     return (
         <main className={styles.container}>
             <div className={styles.productWrap}>
-                {/* Левая колонка */}
                 <div className={styles.leftColumn}>
                     <h2 className={styles.title}>{title}</h2>
                     <div className={styles.imagePlaceholder}>
@@ -139,39 +166,16 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
                     </div>
                 </div>
 
-                {/* Правая колонка */}
                 <div className={styles.rightColumn}>
                     <nav className={styles.nav}>
-                        <button
-                            className={`${styles.navItem} ${activeTab === 'description' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('description')}
-                        >
-                            Описание
-                        </button>
-                        <button
-                            className={`${styles.navItem} ${activeTab === 'price' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('price')}
-                        >
-                            Прайс
-                        </button>
-                        <button
-                            className={`${styles.navItem} ${activeTab === 'properties' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('properties')}
-                        >
-                            Свойства
-                        </button>
-                        <button
-                            className={`${styles.navItem} ${activeTab === 'documents' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('documents')}
-                        >
-                            Документы
-                        </button>
+                        <button className={`${styles.navItem} ${activeTab === 'description' ? styles.active : ''}`} onClick={() => setActiveTab('description')}>Описание</button>
+                        <button className={`${styles.navItem} ${activeTab === 'price' ? styles.active : ''}`} onClick={() => setActiveTab('price')}>Прайс</button>
+                        <button className={`${styles.navItem} ${activeTab === 'properties' ? styles.active : ''}`} onClick={() => setActiveTab('properties')}>Свойства</button>
+                        <button className={`${styles.navItem} ${activeTab === 'documents' ? styles.active : ''}`} onClick={() => setActiveTab('documents')}>Документы</button>
                     </nav>
 
                     <div className={styles.content}>
-                        {activeTab === 'description' && (
-                            <p>Доска обрезная из хвойных пород. Идеально подходит для строительства и отделки.</p>
-                        )}
+                        {activeTab === 'description' && <p>Доска обрезная из хвойных пород.</p>}
 
                         {activeTab === 'price' && (
                             <div className={styles.priceContent}>
@@ -179,53 +183,38 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
                                     <thead>
                                         <tr>
                                             <td rowSpan={2}>Сорт</td>
-                                            <td rowSpan={2}>Ширина доски, мм.</td>
-                                            <td colSpan={4}>Толщина доски, мм.</td>
+                                            <td rowSpan={2}>Ширина, мм</td>
+                                            <td colSpan={grouped.cols.length}>Толщина × Длина, м</td>
                                         </tr>
                                         <tr>
-                                            <td>25</td>
-                                            <td>25</td>
-                                            <td>50</td>
-                                            <td>50</td>
+                                            {grouped.cols.map(col => <td key={col}>{col}</td>)}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {priceData.map((row, rowIdx) => (
+                                        {grouped.rows.map((row, rowIdx) => (
                                             <tr key={rowIdx}>
-                                                <td>{row.sort}</td>
+                                                <td>I-III</td>
                                                 <td>{row.width}</td>
-                                                {row.prices.map((price, colIdx) => {
-                                                    const isSelected = selectedCells.some(
-                                                        cell => cell.row === rowIdx && cell.col === colIdx
-                                                    );
+                                                {grouped.cols.map((col, colIdx) => {
+                                                    const isSelected = selectedCells.some(cell => cell.row === rowIdx && cell.col === colIdx);
+                                                    const price = row.prices[col];
+                                                    const variantId = row.variantIds[col];
                                                     return (
                                                         <td
                                                             key={colIdx}
-                                                            onClick={() => handlePriceClick(rowIdx, colIdx, price)}
+                                                            onClick={() => price && handlePriceClick(rowIdx, colIdx, price, variantId, col, row.width)}
                                                             className={isSelected ? styles.selectedCell : ''}
-                                                            style={{ cursor: 'pointer' }}
+                                                            style={{ cursor: price ? 'pointer' : 'default' }}
                                                         >
-                                                            {price}
+                                                            {price ? `${price} ₽` : '-'}
                                                         </td>
                                                     );
                                                 })}
                                             </tr>
                                         ))}
-                                        <tr>
-                                            <td rowSpan={2}></td>
-                                            <td rowSpan={2}></td>
-                                            <td>4</td>
-                                            <td>6</td>
-                                            <td>4</td>
-                                            <td>6</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan={4}>Длина доски, м.</td>
-                                        </tr>
                                     </tbody>
                                 </table>
 
-                                {/* Панель выбора количества */}
                                 <VariantPanel
                                     items={items}
                                     onQuantityChange={updateQuantity}
@@ -243,9 +232,7 @@ const BoardProduct: React.FC<Props> = ({ title }) => {
                             </ul>
                         )}
 
-                        {activeTab === 'documents' && (
-                            <p>Сертификаты соответствия, паспорт качества.</p>
-                        )}
+                        {activeTab === 'documents' && <p>Сертификаты соответствия, паспорт качества.</p>}
                     </div>
                 </div>
             </div>
