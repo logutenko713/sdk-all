@@ -329,3 +329,18 @@ class CallbackRequest(models.Model):
     def __str__(self):
         return f"Звонок: {self.phone} ({self.created_at.strftime('%d.%m.%Y %H:%M')})"
 # Create your models here.
+
+class SiteSettings(models.Model):
+    phone = models.CharField(max_length=50, default='+7 (888) 888-88-88', verbose_name="Телефон")
+    email = models.EmailField(default='adress_email.ru', verbose_name="Email")
+    address = models.CharField(max_length=255, default='г. Томск, ул. Кузовлевский тракт, 2Б ст31', verbose_name="Адрес")
+    work_hours = models.CharField(max_length=255, default='Пн-Пт: 9:00-18:00, Сб: 10:00-16:00', verbose_name="Режим работы")
+    footer_text = models.CharField(max_length=255, default='© 2026 ООО «СДК». Все права защищены.', verbose_name="Текст в футере")
+    contact_text = models.TextField(default='Нужна консультация? Оставьте свой номер — мы перезвоним и ответим на все вопросы.', verbose_name="Текст в блоке консультации")
+    
+    class Meta:
+        verbose_name = "Настройки сайта"
+        verbose_name_plural = "Настройки сайта"
+    
+    def __str__(self):
+        return "Настройки сайта"

@@ -16,6 +16,7 @@ router.register(r'documentation', views.DocumentationViewSet, basename='document
 router.register(r'table1', views.ProductViewSet, basename='table1')
 router.register(r'table2', views.TableCatalog2ViewSet, basename='table2')
 router.register(r'table3', views.PlywoodCatalogViewSet, basename='table3')
+router.register(r'settings', views.SiteSettingsViewSet, basename='settings')
 
 # АДМИНСКИЕ API (для React-админки)
 router.register(r'admin/products', views.AdminProductViewSet, basename='admin-product')

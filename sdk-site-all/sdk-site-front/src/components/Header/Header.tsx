@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import styles from './Header.module.css';
-
 import logo from '@assets/logo.png';
 import shopIcon from '@assets/icons/shopIcon.png';
 import ShopingCart from '@components/ShopingCart';
@@ -21,6 +20,28 @@ const Header: React.FC = () => {
     } = useCart();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [settings, setSettings] = useState({
+        address: 'Кузовлевский тракт, 2Б ст31',
+        email: 'adress_email.ru',
+        phone: '+7 (888) 888 88-88'
+    });
+
+    // Загружаем настройки сайта (только для данных, не трогаем вёрстку)
+    useEffect(() => {
+        fetch('http://127.0.0.1:8000/api/settings/')
+            .then(res => res.json())
+            .then(data => {
+                const settingsData = data.results?.[0] || data;
+                if (settingsData) {
+                    setSettings({
+                        address: settingsData.address || settings.address,
+                        email: settingsData.email || settings.email,
+                        phone: settingsData.phone || settings.phone
+                    });
+                }
+            })
+            .catch(err => console.error('Ошибка загрузки настроек:', err));
+    }, []);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -49,20 +70,13 @@ const Header: React.FC = () => {
         }
     };
 
-
     return (
         <>
             <div className={styles.topRow}>
                 <div className={styles.contactsHeader}>
-                    <span className={styles.topItems}>
-                        Кузовлевский тракт, 2Б ст31
-                    </span>
-                    <span className={styles.topItems}>
-                        adress_email.ru
-                    </span>
-                    <span className={styles.topItems}>
-                        +7 (888) 888 88-88
-                    </span>
+                    <span className={styles.topItems}>{settings.address}</span>
+                    <span className={styles.topItems}>{settings.email}</span>
+                    <span className={styles.topItems}>{settings.phone}</span>
                 </div>
             </div>
             <div className={styles.stickyBottom}>
@@ -114,7 +128,6 @@ const Header: React.FC = () => {
                                 <span></span>
                             </button>
 
-                            {/* Выпадающее меню для мобильных */}
                             <nav className={`${styles.dropdownMenu} ${isMenuOpen ? styles.dropdownMenuActive : ''}`}>
                                 <Link to="/" className={styles.dropdownLink} onClick={closeMenu}>
                                     Главная

@@ -122,3 +122,9 @@ admin.site.register(Surface)
 admin.site.register(Width)
 admin.site.register(Session)
 admin.site.register(OrderStatus)
+
+from .models import SiteSettings
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    list_display = ['phone', 'email', 'address']

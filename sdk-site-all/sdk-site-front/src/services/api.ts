@@ -70,22 +70,22 @@ class ApiService {
   }
 
   private mapVariant(apiVariant: any, product: any): ProductVariant {
-    const widthValue = apiVariant?.width?.value ?? '-';
+    const widthValue = apiVariant?.width?.value ?? apiVariant?.width ?? '-';
     const thicknessValue = apiVariant?.thickness ?? '-';
     const lengthValue = apiVariant?.length ?? '-';
 
     return {
       id: String(apiVariant?.id ?? ''),
       dimensions: `${thicknessValue}x${widthValue}x${lengthValue}`,
-      woodType: apiVariant?.surface?.name || product?.category || '—',
-      grade: apiVariant?.grade?.name || '—',
-      price: Number(apiVariant?.price_per_m3 ?? 0),
+      woodType: apiVariant?.surface?.name || apiVariant?.surface || product?.category || '—',
+      grade: apiVariant?.grade?.name || apiVariant?.grade || '—',
+      price: Number(apiVariant?.price_per_m3 ?? apiVariant?.price ?? 0),
       stock: Number(apiVariant?.sheets_per_pack ?? 0),
       unit: 'м³',
     };
   }
 
-  private mapProduct(apiProduct: any): Product {
+  private mapProduct(apiProduct: any, type: string): Product {
     const variants = Array.isArray(apiProduct?.variants)
       ? apiProduct.variants.map((v: any) => this.mapVariant(v, apiProduct))
       : [];
@@ -96,28 +96,36 @@ class ApiService {
       image: apiProduct?.image || '',
       description: apiProduct?.description || '',
       variants,
-      category: apiProduct?.category,
+      category: apiProduct?.category || type,
       isActive: apiProduct?.is_active,
     };
   }
 
   async getProducts(): Promise<Product[]> {
-    const data = await this.request(config.api.endpoints.products);
+    const [boards, chips, plywoods] = await Promise.all([
+      this.request('/table1/').catch(() => []),
+      this.request('/table2/').catch(() => []),
+      this.request('/table3/').catch(() => [])
+    ]);
 
-    const rawList = Array.isArray(data)
-      ? data
-      : Array.isArray(data?.results)
-        ? data.results
-        : Array.isArray(data?.data)
-          ? data.data
-          : [];
+    const boardsList = Array.isArray(boards) ? boards : boards.results || [];
+    const chipsList = Array.isArray(chips) ? chips : chips.results || [];
+    const plywoodsList = Array.isArray(plywoods) ? plywoods : plywoods.results || [];
 
-    return rawList.map((item: any) => this.mapProduct(item));
+    return [
+      ...boardsList.map((item: any) => this.mapProduct(item, 'Пиломатериалы')),
+      ...chipsList.map((item: any) => this.mapProduct(item, 'Щепа/Шпон')),
+      ...plywoodsList.map((item: any) => this.mapProduct(item, 'Фанера'))
+    ];
   }
 
   async getProductVariants(productId: number): Promise<any[]> {
-    const data = await this.request(`/products/${productId}/variants/`);
-    return data;
+    try {
+      const data = await this.request(`/table1/${productId}/variants/`);
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      return [];
+    }
   }
 
   async getCarousel(): Promise<any[]> {
@@ -128,9 +136,37 @@ class ApiService {
     return Array.isArray(data) ? data : [];
   }
 
+  // Публичные настройки (без токена) — для футера, карты
+  async getPublicSettings(): Promise<any> {
+    const data = await this.request('/settings/');
+    if (data && data.results && data.results.length > 0) {
+      return data.results[0];
+    }
+    return data;
+  }
+
+  // Админские настройки (с токеном) — для админки
+  async getSettings(): Promise<any> {
+    const data = await this.requestWithSession('/settings/');
+    if (data && data.results && data.results.length > 0) {
+      return data.results[0];
+    }
+    return data;
+  }
+
+  async updateSettings(settings: any): Promise<any> {
+    const data = await this.requestWithSession('/settings/');
+    const id = data.results?.[0]?.id || data.id;
+    if (!id) throw new Error('Settings not found');
+    return this.requestWithSession(`/settings/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+  }
+
   private mapCartItem(apiItem: any): CartItem {
     const variant = apiItem?.variant || {};
-    const widthValue = variant?.width?.value ?? '-';
+    const widthValue = variant?.width?.value ?? variant?.width ?? '-';
     const thicknessValue = variant?.thickness ?? '-';
     const lengthValue = variant?.length ?? '-';
 
@@ -142,8 +178,8 @@ class ApiService {
       price: Number(apiItem?.price_at_moment ?? 0),
       quantity: Number(apiItem?.quantity ?? 0),
       dimensions: `${thicknessValue}x${widthValue}x${lengthValue}`,
-      woodType: variant?.surface?.name || '—',
-      grade: variant?.grade?.name || '—',
+      woodType: variant?.surface?.name || variant?.surface || '—',
+      grade: variant?.grade?.name || variant?.grade || '—',
       maxStock: Number(variant?.sheets_per_pack ?? 0),
     };
   }
@@ -168,7 +204,7 @@ class ApiService {
     
     console.log('[API] addToCart payload:', payload);
     
-    const data = await this.requestWithSession('/api/cart/add_item/', {
+    const data = await this.requestWithSession('/cart/add_item/', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
@@ -183,22 +219,22 @@ class ApiService {
   }
 
   async updateCartItem(itemId: string, quantity: number): Promise<CartItem[]> {
-    const data = await this.requestWithSession(`/api/cart/items/${itemId}/`, {
-      method: 'PATCH',
+    const data = await this.requestWithSession(`/cart/items/${itemId}/`, {
+      method: 'PUT',  // ← ИЗМЕНЕНО: PATCH → PUT
       body: JSON.stringify({ quantity }),
     });
     return this.mapCartResponse(data);
   }
 
   async removeCartItem(itemId: string): Promise<CartItem[]> {
-    const data = await this.requestWithSession(`/api/cart/items/${itemId}/`, {
+    const data = await this.requestWithSession(`/cart/items/${itemId}/`, {
       method: 'DELETE',
     });
     return this.mapCartResponse(data);
   }
 
   async clearCart(): Promise<CartItem[]> {
-    const data = await this.requestWithSession('/api/cart/clear/', {
+    const data = await this.requestWithSession('/cart/clear/', {
       method: 'DELETE',
     });
     return this.mapCartResponse(data);
@@ -213,7 +249,7 @@ class ApiService {
     comment?: string;
   }) {
     console.log('[API] createOrder payload:', payload);
-    return this.requestWithSession('/api/orders/', {
+    return this.requestWithSession('/orders/', {
       method: 'POST',
       body: JSON.stringify(payload),
     });

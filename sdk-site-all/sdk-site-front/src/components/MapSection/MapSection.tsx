@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { apiService } from '../../services/api';
 import styles from './MapSection.module.css';
 
 declare global {
@@ -12,10 +13,29 @@ const MapSection: React.FC = () => {
     const [map, setMap] = useState<any>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [loadError, setLoadError] = useState(false);
+    const [address, setAddress] = useState('г. Томск, ул. Кузовлевский тракт, 2Б ст31');
+    const [phone, setPhone] = useState('+7 (888) 888-88-88');
+    const [email, setEmail] = useState('adress_email.ru');
+    const [workHours, setWorkHours] = useState('Пн-Пт: 9:00-18:00, Сб: 10:00-16:00');
 
     const companyCoordinates = [56.624173, 85.057405];
     const apiKey = 'bb1a5b34-ca4a-48d4-a21f-6ee89d52048d';
 
+    // Загружаем настройки сайта
+    useEffect(() => {
+        apiService.getPublicSettings()
+            .then(data => {
+                if (data) {
+                    if (data.address) setAddress(data.address);
+                    if (data.phone) setPhone(data.phone);
+                    if (data.email) setEmail(data.email);
+                    if (data.work_hours) setWorkHours(data.work_hours);
+                }
+            })
+            .catch(err => console.error('Ошибка загрузки настроек:', err));
+    }, []);
+
+    // Инициализация карты
     useEffect(() => {
         if (window.ymaps) {
             initMap();
@@ -57,7 +77,7 @@ const MapSection: React.FC = () => {
             });
 
             const placemark = new window.ymaps.Placemark(companyCoordinates, {
-                balloonContent: 'Томск, Кузовлевский тракт, 2Бс31'
+                balloonContent: address
             });
 
             newMap.geoObjects.add(placemark);
@@ -73,16 +93,25 @@ const MapSection: React.FC = () => {
         return (
             <section className={styles.mapSection}>
                 <div className={styles.container}>
-                    <div className={styles.mapHeader}>
-                        <h2 className={styles.mapTitle}>Наш склад</h2>
-                        <p className={styles.mapSubtitle}>
-                            Приезжайте забирать товар сами по адресу: Томск, ул. Кузовлевский тракт, 2Бс31
-                        </p>
-                    </div>
-                    <div className={styles.mapContainer}>
-                        <div className={styles.mapPlaceholder}>
-                            Карта временно недоступна
+                    <div className={styles.contactsBlock}>
+                        <h2 className={styles.title}>Наш склад</h2>
+                        <div className={styles.contactsInfo}>
+                            <div className={styles.contactItem}>
+                                <span className={styles.icon}>📍</span>
+                                <span>{address}</span>
+                            </div>
+                            <div className={styles.contactItem}>
+                                <span className={styles.icon}>📞</span>
+                                <span>{phone}</span>
+                            </div>
+                            <div className={styles.contactItem}>
+                                <span className={styles.icon}>✉️</span>
+                                <span>{email}</span>
+                            </div>
                         </div>
+                    </div>
+                    <div className={styles.mapPlaceholder}>
+                        Карта временно недоступна
                     </div>
                 </div>
             </section>
@@ -97,19 +126,19 @@ const MapSection: React.FC = () => {
                     <div className={styles.contactsInfo}>
                         <div className={styles.contactItem}>
                             <span className={styles.icon}>📍</span>
-                            <span>г. Томск, ул. Кузовлевский тракт, 2Б ст31</span>
+                            <span>{address}</span>
                         </div>
                         <div className={styles.contactItem}>
                             <span className={styles.icon}>📞</span>
-                            <span>+7 (888) 888-88-88</span>
+                            <span>{phone}</span>
                         </div>
                         <div className={styles.contactItem}>
                             <span className={styles.icon}>🕒</span>
-                            <span>Пн-Пт: 9:00-18:00, Сб: 10:00-16:00</span>
+                            <span>{workHours}</span>
                         </div>
                         <div className={styles.contactItem}>
                             <span className={styles.icon}>✉️</span>
-                            <span>adress_email.ru</span>
+                            <span>{email}</span>
                         </div>
                     </div>
                 </div>

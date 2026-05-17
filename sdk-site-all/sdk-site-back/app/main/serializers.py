@@ -14,7 +14,7 @@ class PriceUpsertSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 from .models import (Product, ProductVariant, Cart, CartItem, Order, OrderItem, CallbackRequest, Session, Grade,
-                     Surface, Width, OrderStatus, CarouselSection, Documentation, TableCatalog2, PlywoodCatalog)
+                     Surface, Width, OrderStatus, CarouselSection, Documentation, TableCatalog2, PlywoodCatalog, SiteSettings)
 
 class PlywoodCatalogSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
@@ -224,3 +224,8 @@ class CallbackRequestSerializer(serializers.ModelSerializer): # Информац
         model = CallbackRequest
         fields = ['id', 'phone', 'created_at', 'is_processed']
         read_only_fields = ['created_at', 'is_processed']
+
+class SiteSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteSettings
+        fields = '__all__'

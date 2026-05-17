@@ -1,34 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Footer.module.css';
 import logo from '@assets/logoLight.png';
 
-const defaultSettings = {
-    phone: '+7 (888) 888-88-88',
-    email: 'adress_email.ru',
-    address: 'г. Томск, ул. Кузовлевский тракт, 2Б ст31',
-    workHours: 'Пн-Пт: 9:00-18:00, Сб: 10:00-16:00',
-    footerText: '© 2026 ООО «СДК». Все права защищены.'
-};
-
-const Footer: React.FC = () => {
-    const [settings, setSettings] = useState(defaultSettings);
+const Footer = () => {
+    const [settings, setSettings] = useState({
+        phone: '+7 (888) 888-88-88',
+        email: 'adress_email.ru',
+        address: 'г. Томск, ул. Кузовлевский тракт, 2Б ст31',
+        work_hours: 'Пн-Пт: 9:00-18:00',
+        footer_text: '© 2026 ООО «СДК». Все права защищены.',
+        _updated: Date.now()
+    });
 
     useEffect(() => {
-        const saved = localStorage.getItem('site_settings');
-        if (saved) {
-            setSettings(prev => ({ ...prev, ...JSON.parse(saved) }));
-        }
+        fetch('http://127.0.0.1:8000/api/settings/')
+            .then(res => res.json())
+            .then(data => {
+                const settingsData = data.results?.[0] || data;
+                if (settingsData) {
+                    setSettings({
+                        phone: settingsData.phone || settings.phone,
+                        email: settingsData.email || settings.email,
+                        address: settingsData.address || settings.address,
+                        work_hours: settingsData.work_hours || settings.work_hours,
+                        footer_text: settingsData.footer_text || settings.footer_text,
+                        _updated: Date.now()
+                    });
+                }
+            })
+            .catch(err => console.error('Ошибка загрузки настроек:', err));
     }, []);
 
     return (
-        <header className={styles.footer}>
+        <footer key={settings._updated} className={styles.footer}>
             <div className={styles.footerMain}>
                 <div className={styles.footerSection}>
                     <div className={styles.logoSection}>
                         <img src={logo} alt="Логотип компании" className={styles.footerLogo} />
-                        <h4>
-                            Надёжный поставщик пиломатериалов по всей России.
-                        </h4>
+                        <h4>Надёжный поставщик пиломатериалов по всей России.</h4>
                         <p className={styles.companyDescription}>
                             Мы предлагаем древесину только высокого качества: от доски и шпона до фанеры и щепы.
                             Работаем с 2005 года — знаем всё о дереве и честной цене.
@@ -40,7 +49,7 @@ const Footer: React.FC = () => {
                     <h3 className={styles.sectionTitle}>Навигация</h3>
                     <nav className={styles.footerNav}>
                         <a href="/" className={styles.footerLink}>Главная</a>
-                        <a href="/services" className={styles.footerLink}>Каталог</a>
+                        <a href="/catalog" className={styles.footerLink}>Каталог</a>
                         <a href="/documents" className={styles.footerLink}>Документация</a>
                     </nav>
                 </div>
@@ -62,17 +71,15 @@ const Footer: React.FC = () => {
                         </div>
                         <div className={styles.contactItem}>
                             <span className={styles.contactLabel}>Режим работы:</span>
-                            <span className={styles.contactText}>{settings.workHours}</span>
+                            <span className={styles.contactText}>{settings.work_hours}</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div className={styles.footerBottom}>
-                <div className={styles.copyright}>
-                    {settings.footerText}
-                </div>
+                <div className={styles.copyright}>{settings.footer_text}</div>
             </div>
-        </header>
+        </footer>
     );
 };
 
