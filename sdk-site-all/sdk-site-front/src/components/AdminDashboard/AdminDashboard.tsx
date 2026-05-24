@@ -22,6 +22,7 @@ const AdminDashboard = () => {
                     <Link to="/admin/carousel" className={styles.navLink}>🖼️ Слайды</Link>
                     <Link to="/admin/settings" className={styles.navLink}>⚙️ Настройки</Link>
                     <Link to="/admin/docs" className={styles.navLink}>📄 Документы</Link>
+                    <Link to="/admin/callbacks" className={styles.navLink}>📞 Заявки</Link>
                 </nav>
                 <button onClick={handleLogout} className={styles.logoutBtn}>
                     🚪 Выйти

@@ -136,6 +136,15 @@ class ApiService {
     return Array.isArray(data) ? data : [];
   }
 
+  // Публичные документы (без токена) — для страницы /documents
+  async getPublicDocs(): Promise<any[]> {
+    const data = await this.request('/documentation/');
+    if (data && Array.isArray(data.results)) {
+      return data.results;
+    }
+    return Array.isArray(data) ? data : [];
+  }
+
   // Публичные настройки (без токена) — для футера, карты
   async getPublicSettings(): Promise<any> {
     const data = await this.request('/settings/');
@@ -220,7 +229,7 @@ class ApiService {
 
   async updateCartItem(itemId: string, quantity: number): Promise<CartItem[]> {
     const data = await this.requestWithSession(`/cart/items/${itemId}/`, {
-      method: 'PUT',  // ← ИЗМЕНЕНО: PATCH → PUT
+      method: 'PUT',
       body: JSON.stringify({ quantity }),
     });
     return this.mapCartResponse(data);

@@ -70,6 +70,8 @@ const AdminDocs = () => {
             }
             closeForm();
         } else {
+            const error = await response.text();
+            console.error('Ошибка:', error);
             alert('Ошибка сохранения');
         }
     };
@@ -122,18 +124,18 @@ const AdminDocs = () => {
                 <div className={styles.form}>
                     <input type="text" placeholder="Название документа" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                     
-                    <label className={styles.label}>Изображение (превью)</label>
+                    <label>Изображение (превью)</label>
                     <input type="file" accept="image/*" onChange={handleImageChange} />
-                    {preview && <img src={preview} alt="Превью" className={styles.preview} />}
+                    {preview && <img src={preview} alt="Превью" style={{ width: '100px' }} />}
                     
-                    <label className={styles.label}>PDF файл</label>
+                    <label>PDF файл</label>
                     <input type="file" accept="application/pdf" onChange={handleFileChange} />
                     
-                    <label className={styles.checkboxLabel}>
+                    <label>
                         <input type="checkbox" checked={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.checked })} />
                         Активен
                     </label>
-                    <div className={styles.formButtons}>
+                    <div>
                         <button onClick={handleSave}>Сохранить</button>
                         <button onClick={closeForm}>Отмена</button>
                     </div>
@@ -157,27 +159,12 @@ const AdminDocs = () => {
                             <td>{doc.id}</td>
                             <td>{doc.name}</td>
                             <td>
-                                {doc.image && <img src={`${MEDIA_BASE}${doc.image}`} alt="превью" className={styles.thumbnail} />}
+                                {doc.image && <img src={`${MEDIA_BASE}${doc.image}`} alt="превью" style={{ width: '50px' }} />}
                             </td>
                             <td>
-                                {doc.pdf_url && <a href={`${MEDIA_BASE}${doc.pdf_url}`} target="_blank" rel="noopener noreferrer">📄 PDF</a>}
+                                {doc.pdf && <a href={`${MEDIA_BASE}${doc.pdf}`} target="_blank">PDF</a>}
                             </td>
-                            <td>
-                                <button onClick={() => {
-                                    fetch(`${API_URL}${doc.id}/`, {
-                                        method: 'PATCH',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Token ${token}`
-                                        },
-                                        body: JSON.stringify({ is_active: !doc.is_active })
-                                    }).then(() => {
-                                        setDocs(docs.map(d => d.id === doc.id ? { ...d, is_active: !d.is_active } : d));
-                                    });
-                                }}>
-                                    {doc.is_active ? '✅' : '❌'}
-                                </button>
-                            </td>
+                            <td>{doc.is_active ? '✅' : '❌'}</td>
                             <td>
                                 <button onClick={() => openEditForm(doc)}>✏️</button>
                                 <button onClick={() => handleDelete(doc.id)}>🗑️</button>

@@ -10,6 +10,7 @@ const FeedbackCarousel: React.FC = () => {
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         apiService.getCarousel()
@@ -64,15 +65,37 @@ const FeedbackCarousel: React.FC = () => {
         return formatted;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!fullName.trim() || phone.length !== 11) {
             alert('Пожалуйста, заполните ФИО и номер телефона');
             return;
         }
-        console.log('Обратный звонок:', { fullName, phone });
-        setFullName('');
-        setPhone('');
+
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/callbacks/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    phone: phone,
+                    full_name: fullName
+                })
+            });
+
+            if (response.ok) {
+                alert('Заявка отправлена! Мы свяжемся с вами.');
+                setFullName('');
+                setPhone('');
+            } else {
+                alert('Ошибка отправки. Попробуйте позже.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка соединения');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const renderSlide = (index: number) => {
@@ -102,8 +125,8 @@ const FeedbackCarousel: React.FC = () => {
                             className={styles.callbackInput}
                             required
                         />
-                        <button type="submit" className={styles.callbackButton}>
-                            Обратный звонок
+                        <button type="submit" className={styles.callbackButton} disabled={isSubmitting}>
+                            {isSubmitting ? 'Отправка...' : 'Обратный звонок'}
                         </button>
                     </form>
                 </div>

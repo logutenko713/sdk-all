@@ -11,6 +11,7 @@ import AdminVariants from './components/AdminVariants/AdminVariants';
 import AdminCarousel from './components/AdminCarousel/AdminCarousel';
 import AdminDocs from './components/AdminDocs/AdminDocs';
 import CheckoutPage from './pages/CheckoutPage';
+import AdminCallbacks from './components/AdminCallbacks/AdminCallbacks';
 
 import {
   Header,
@@ -46,6 +47,7 @@ function App() {
               <Route path="variants" element={<AdminVariants />} />
               <Route path="carousel" element={<AdminCarousel />} />
               <Route path="docs" element={<AdminDocs />} />
+              <Route path="callbacks" element={<AdminCallbacks />} />
             </Route>
           </Routes>
           <Footer />
